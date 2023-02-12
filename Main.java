@@ -6,8 +6,35 @@ public class Main{
       beach2.explore();
       Picture copy2 = testSetLow(beach2, Color.PINK);
       copy2.explore();
+      Picture copy3 = revealPicture(copy2);
+      copy3.explore();
     }
 
+    /**
+     * Sets the highest two bits of each pixel's colors
+     * to the lowest two bits of each pixel's colors
+     * @param Picture named hidden
+     * @return Picture object
+     */
+
+    public static Picture revealPicture(Picture hidden){
+        Picture copy = new Picture(hidden);
+        Pixel[][] pixels = copy.getPixels2D();
+        Pixel[][] source = hidden.getPixels2D();
+        for(int r = 0; r < pixels.length; r++){
+            for(int c = 0; c < pixels[0].length; c++){
+                Color col = source[r][c].getColor();
+                pixels[r][c].setRed((col.getRed() % 4) * 64 + source[r][c].getRed() % 64);
+                pixels[r][c].setBlue((col.getBlue() % 4) * 64 + source[r][c].getBlue() % 64);
+                pixels[r][c].setGreen((col.getGreen() % 4) * 64 + source[r][c].getGreen() % 64);
+            }
+        }
+        return copy;
+    }
+    /***
+     * Clear the lowest rightmost bits in a pixel
+     * @param Pixel p
+     */
     public static void clearLow(Pixel p){
         int newRed = p.getRed() >> 4 << 4;
         int newGreen = p.getGreen() >> 4 << 4;
@@ -54,7 +81,7 @@ public class Main{
         Pixel[][] pixelsInImage = p.getPixels2D();
         for(Pixel[] pix: pixelsInImage){
             for(Pixel pix2 : pix){
-                setLow(pix2, Color.PINK);
+                setLow(pix2, c);
             }
         }
         return p;
