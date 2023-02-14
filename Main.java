@@ -2,12 +2,53 @@ import java.awt.Color;
 public class Main{
 
     public static void main(String[] args){
-      Picture beach2 = new Picture("beach.jpg");
-      beach2.explore();
-      Picture copy2 = testSetLow(beach2, Color.PINK);
-      copy2.explore();
-      Picture copy3 = revealPicture(copy2);
-      copy3.explore();
+      Picture beach = new Picture("beach.jpg");
+      Picture arch = new Picture("blue-mark.jpg");
+      if(canHide(beach, arch)){
+        Picture newbeach = hidePicture(beach, arch);
+        newbeach.explore();
+      } else {
+        System.out.println("HEH");
+      }
+
+      Picture revealed = revealPicture(beach);
+      revealed.explore(); 
+      
+    }
+
+    /***
+     * Creates a new Piucture with data from secret hidden in data from source
+     * @param source is not null
+     * @param secret is not null
+     * @return true if secret can be hidden in source, false otherwise.
+     */
+
+    public static Picture hidePicture(Picture source, Picture secret){
+        Picture copy = new Picture(source);
+        Pixel[][] sourcePix = copy.getPixels2D();
+        Pixel[][] secretPix = secret.getPixels2D();
+        for(int i = 0; i < source.getHeight(); i++){
+            for(int j = 0; j < source.getWidth(); j++){
+                setLow(sourcePix[i][j], secretPix[i][j].getColor());
+            }
+        }
+        return copy;
+    }
+
+    /***
+     * Determines whether scret can be hidden in source, which is true if source and secret
+     * are the same dimensions.
+     * @param source is not null
+     * @param secret is not null
+     * @return true if secret can be hidden in source, false otherwise.
+     */
+
+    public static boolean canHide(Picture source, Picture secret){
+        if(source.getWidth() == secret.getWidth() && source.getHeight() == secret.getHeight()){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -24,9 +65,9 @@ public class Main{
         for(int r = 0; r < pixels.length; r++){
             for(int c = 0; c < pixels[0].length; c++){
                 Color col = source[r][c].getColor();
-                pixels[r][c].setRed((col.getRed() % 4) * 64 + source[r][c].getRed() % 64);
-                pixels[r][c].setBlue((col.getBlue() % 4) * 64 + source[r][c].getBlue() % 64);
-                pixels[r][c].setGreen((col.getGreen() % 4) * 64 + source[r][c].getGreen() % 64);
+                pixels[r][c].setRed((col.getRed() % 4) * 64 + col.getRed() % 64);
+                pixels[r][c].setBlue((col.getBlue() % 4) * 64 + col.getBlue() % 64);
+                pixels[r][c].setGreen((col.getGreen() % 4) * 64 + col.getGreen() % 64);
             }
         }
         return copy;
@@ -36,9 +77,9 @@ public class Main{
      * @param Pixel p
      */
     public static void clearLow(Pixel p){
-        int newRed = p.getRed() >> 4 << 4;
-        int newGreen = p.getGreen() >> 4 << 4;
-        int newBlue = p.getBlue() >> 4 << 4;
+        int newRed = p.getRed() / 4 * 4;
+        int newGreen = p.getGreen() / 4 * 4;
+        int newBlue = p.getBlue() / 4 * 4;
         p.setRed(newRed);
         p.setBlue(newBlue);
         p.setGreen(newGreen);
