@@ -65,9 +65,9 @@ public class Main{
         for(int r = 0; r < pixels.length; r++){
             for(int c = 0; c < pixels[0].length; c++){
                 Color col = source[r][c].getColor();
-                pixels[r][c].setRed((col.getRed() % 4) * 64 + col.getRed() % 64);
-                pixels[r][c].setBlue((col.getBlue() % 4) * 64 + col.getBlue() % 64);
-                pixels[r][c].setGreen((col.getGreen() % 4) * 64 + col.getGreen() % 64);
+                pixels[r][c].setRed((col.getRed() % 4) * 64 + pixels[r][c].getRed() % 64);
+                pixels[r][c].setBlue((col.getBlue() % 4) * 64 + pixels[r][c].getBlue() % 64);
+                pixels[r][c].setGreen((col.getGreen() % 4) * 64 + pixels[r][c].getGreen() % 64);
             }
         }
         return copy;
