@@ -58,6 +58,11 @@ public class Main{
             recPixels[i + startPixel.getX()][endPixel.getY()].setColor(new Color(255, 0, 0));
         }
 
+        for(int i = 0; i < pic.getWidth(); i++){
+            recPixels[startPixel.getX()][i + startPixel.getY()].setColor(new Color(255, 0, 0));
+            recPixels[endPixel.getX()][i + startPixel.getY()].setColor(new Color(255, 0, 0));
+        }
+        return pic;
 
     }
 
