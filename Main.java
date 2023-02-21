@@ -3,66 +3,145 @@ import java.util.ArrayList;
 public class Main{
 
     public static void main(String[] args){
-     /*Picture beach = new Picture("beach.jpg");
-      Picture robot = new Picture("robot.jpg");
-      Picture flower1 = new Picture("flower1.jpg");
+        Picture arch = new Picture("arch.jpg");
+        hideText(arch, "HI");
+        arch.explore();
 
-      Picture hidden1 = hidePicture(beach, robot, 65, 208);
-      Picture hidden2 = hidePicture(hidden1, flower1, 280, 110);
-
-      Picture unhidden = revealPicture(hidden2);
-      unhidden.explore();
-
-      Picture swan = new Picture("swan.jpg");
-      Picture swan2 = new Picture("swan.jpg");
-      System.out.println("Swan and swan2 are the same: " + isSame(swan, swan2));
-
-      swan = testClearLow(swan);
-      System.out.println("Swan and swan2 are the same (after clearLow run on swan): " + isSame(swan, swan2));
-
-      Picture arch = new Picture("arch.jpg");
-      Picture arch2 = new Picture("arch.jpg");
-      Picture koala = new Picture("koala.jpg");
-      Picture robot1 = new Picture("robot.jpg");
-      ArrayList<Pixel> pointList = findDifferences(arch, arch2);
-      System.out.println("PointList after comparing two identical pictures " +
-      "has a size of " + pointList.size());
-
-      pointList = findDifferences(arch, koala);
-      System.out.println("PointList after comparing two different sized pictures " +
-      "has a size of " + pointList.size());
-      arch2 = hidePicture(arch, robot1, 65, 102);
-      pointList = findDifferences(arch, arch2);
-      System.out.println("PointList after hiding a picture has a size of " +
-      pointList.size());
-
-      arch.show();
-      arch2.show();*/
-
-      Picture hall = new Picture("femaleLionAndHall.jpg");
+        revealText(arch);
+        arch.explore();
       
     }
+
+    /***
+     * @param String s
+     * @return ArrayList result
+     */
+    public static ArrayList<Integer> encodeString(String s) {
+        s = s.toUpperCase();
+        String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        ArrayList<Integer> result = new ArrayList<Integer>();
+        for (int i = 0; i < s.length(); i++) {
+            if (s.substring(i, i+1).equals(" ")) {
+                result.add(27);
+            } else {
+                result.add(alpha.indexOf(s.substring(i, i+1))+1);
+            }
+        }
+
+        result.add(0);
+        return result;
+    }
+
+        /**
+    * Returns the string represented by the codes arraylist.
+    * 1 - 26, 27 = space
+    * @param codes encoded string
+    * @return decoded string
+    */
+
+    private static String decodeString(ArrayList<Integer> codes) {
+        String result = "";
+        String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for (int i = 0; i < codes.size(); i++) {
+            if (codes.get(i) == 27) {
+                result = result + " ";
+            } else {
+                result = result + alpha.substring(codes.get(i), codes.get(i) + 1);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+    * Given a number from 0 - 63, creates an returns a 3-element
+    * int array consisting of the integers representing the
+    * pairs of bits in the number from right to left
+    * @param num number ot be broken up
+    * return bit pairs in number
+    */
+
+    private static int[] getBitPairs(int num) {
+        int[] bits = new int[3];
+        int code = num;
+        for (int i = 0; i < 3; i++) {
+            bits[i] = code%4;
+            code = code/4;
+        }
+
+        return bits;
+    
+    }
+
+        /**
+    * Hide a string (must be only capital letters and spaces) in a
+    * picture.
+    * The string always starts in the upper left corner.
+    * @param source picture to hide string in
+    * param s string to hide
+    * @return picture with hidden string
+    */
+
+    public static void hideText(Picture source, String s) {
+        Pixel[][] pixels = source.getPixels2D();
+        ArrayList<Integer> encoded = encodeString(s);
+
+        for (int i = 0; i < encoded.size(); i++) {
+            Pixel p = pixels[0][i];
+            clearLow(p);
+
+            int[] bits = getBitPairs(encoded.get(i));
+            
+            p.setRed(p.getRed() + (bits[0]));
+            p.setGreen(p.getGreen() + (bits[1]));
+            p.setBlue(p.getBlue() + (bits[2]));
+        }
+        
+    }
+
+    /**
+    * Returns a string hidden in the picture
+    * @param source picture with hidden string
+    * @return revealed string
+    */
+
+    public static String revealText(Picture source) {
+        Pixel[][] pixels = source.getPixels2D();
+        ArrayList<Integer> codes = new ArrayList<Integer>();
+        for(int i = 0; i < pixels[0].length; i++){
+            int[] bits = {pixels[0][i].getRed() % 4, pixels[0][i].getBlue() % 4, pixels[0][i].getGreen() % 4};
+            int num = Integer.parseInt(Integer.toBinaryString(bits[0] * 16 + bits[1] * 4 + bits[2]), 2);
+
+            if(num == 0){
+                break;
+            } else {
+                codes.add(num);
+            }
+        }
+        return decodeString(codes);
+    }
+
+
     /***
      * Draws a rectangle around the part of the picture that is different
      * @param source
      * @return
      */
     public static Picture showDifferentArea(Picture source, ArrayList<Pixel> pixels){
-        Picture pic = new Picture(pixels.get(pixels.size() - 1).getY() - pixels.get(0).getY(),
-        pixels.get(pixels.size() - 1).getX() - pixels.get(0).getX());
-        Pixel[][] recPixels = pic.getPixels2D();
+        Picture replacement = new Picture(source);
         Pixel startPixel = pixels.get(0);
         Pixel endPixel = pixels.get(pixels.size() - 1);
-        for(int i = 0; i < pic.getHeight(); i++){
-            recPixels[i + startPixel.getX()][startPixel.getY()].setColor(new Color(255, 0, 0));
-            recPixels[i + startPixel.getX()][endPixel.getY()].setColor(new Color(255, 0, 0));
+        
+        for(int i = startPixel.getX(); i <= endPixel.getX(); i++){
+            replacement.getPixel(i, startPixel.getY()).setColor(new Color(255, 0, 0));
+            replacement.getPixel(i, endPixel.getY()).setColor(new Color(255, 0, 0));
         }
 
-        for(int i = 0; i < pic.getWidth(); i++){
-            recPixels[startPixel.getX()][i + startPixel.getY()].setColor(new Color(255, 0, 0));
-            recPixels[endPixel.getX()][i + startPixel.getY()].setColor(new Color(255, 0, 0));
+        for(int i = startPixel.getY(); i <= endPixel.getY(); i++){
+            replacement.getPixel(startPixel.getX(), i).setColor(new Color(255, 0, 0));
+            replacement.getPixel(endPixel.getX(), i).setColor(new Color(255, 0, 0));
         }
-        return pic;
+        return replacement;
 
     }
 
@@ -78,8 +157,8 @@ public class Main{
         Pixel[][] pic2pixels = pic2.getPixels2D();
         ArrayList<Pixel> coords = new ArrayList<Pixel>();
         if(canHide(pic1, pic2, 0, 0)){
-            for(int i = 0; i < pic1.getHeight(); i++){
-                for(int j = 0; j < pic2.getWidth(); j++){
+            for(int i = 0; i < pic1pixels.length; i++){
+                for(int j = 0; j < pic1pixels[0].length; j++){
                     if(pic1pixels[i][j].getRed() != pic2pixels[i][j].getRed() || pic1pixels[i][j].getBlue() != pic2pixels[i][j].getBlue() 
                     || pic1pixels[i][j].getGreen() != pic2pixels[i][j].getGreen()){
                         coords.add(pic1pixels[i][j]);

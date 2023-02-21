@@ -19,7 +19,7 @@ public class SimplePicture implements DigitalPicture
   
   /////////////////////// Fields /////////////////////////
   
-  /**
+  /**F
    * the file name associated with the simple picture
    */
   private String fileName;
